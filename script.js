@@ -26,7 +26,7 @@ document.addEventListener('DOMContentLoaded', function() {
     function showNextGreeting() {
         welcomeText.style.animation = 'none';
         welcomeText.offsetHeight; // Trigger reflow
-        welcomeText.style.animation = 'textFade 0.8s ease-in-out';
+        welcomeText.style.animation = 'textFade 0.3s ease-in-out';
         welcomeText.textContent = greetings[currentIndex];
         currentIndex = (currentIndex + 1) % greetings.length;
     }
@@ -57,7 +57,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Auto-scroll after 1.5 more seconds if user doesn't click
         setTimeout(initiateScrollDown, 1500);
-    }, 2500);
+    }, 2100);
     
     // Function to handle the scroll transition
     function initiateScrollDown() {
@@ -68,6 +68,9 @@ document.addEventListener('DOMContentLoaded', function() {
         if (heroSection) {
             heroSection.classList.add('visible');
         }
+        
+        // Hide all reveal sections initially
+        initializeScrollRevealElements();
         
         // Remove the auto-scroll behavior
         // As we fade out the overlay
@@ -130,4 +133,103 @@ document.addEventListener('DOMContentLoaded', function() {
     fadeElements.forEach(el => {
         observer.observe(el);
     });
+
+    // Enhanced scroll reveal functionality
+    function initializeScrollRevealElements() {
+        // Select all elements that should have reveal animations
+        const revealElements = document.querySelectorAll('.reveal-on-scroll');
+        
+        // Hide all elements initially
+        revealElements.forEach(el => {
+            el.style.opacity = "0";
+            el.style.transform = getInitialTransform(el);
+            el.style.transition = "opacity 0.8s ease-out, transform 0.8s ease-out";
+        });
+        
+        // Set up the intersection observer
+        const revealObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    // Reveal the element with a slight delay based on its position
+                    const delay = entry.target.dataset.revealDelay || 0;
+                    setTimeout(() => {
+                        entry.target.style.opacity = "1";
+                        entry.target.style.transform = "translateY(0) scale(1)";
+                    }, delay);
+                    
+                    // Unobserve after animation
+                    revealObserver.unobserve(entry.target);
+                }
+            });
+        }, {
+            threshold: 0.15,
+            rootMargin: "0px 0px -100px 0px" // Trigger slightly before element enters viewport
+        });
+        
+        // Observe all reveal elements
+        revealElements.forEach(el => {
+            revealObserver.observe(el);
+        });
+    }
+    
+    // Helper to determine the initial transform based on element type or class
+    function getInitialTransform(element) {
+        // You can customize different reveal effects based on classes
+        if (element.classList.contains('reveal-from-left')) {
+            return "translateX(-50px) translateY(0)";
+        } else if (element.classList.contains('reveal-from-right')) {
+            return "translateX(50px) translateY(0)";
+        } else if (element.classList.contains('reveal-scale')) {
+            return "translateY(0) scale(0.95)";
+        } else {
+            // Default reveal from bottom
+            return "translateY(30px)";
+        }
+    }
+    
+    // Apply the reveal classes to specific elements
+    function setupRevealElements() {
+        // Timeline items reveal from left
+        document.querySelectorAll('.timeline-item').forEach((el, index) => {
+            el.classList.add('reveal-on-scroll', 'reveal-from-left');
+            el.dataset.revealDelay = index * 150; // Staggered animation
+        });
+        
+        // Skills grid reveals from bottom with scaling
+        document.querySelectorAll('.mt-20 .grid-cols-2 > div').forEach((el, index) => {
+            el.classList.add('reveal-on-scroll', 'reveal-scale');
+            el.dataset.revealDelay = index * 100; 
+        });
+        
+        // Project cards reveal from bottom with staggered timing
+        document.querySelectorAll('.project-card').forEach((el, index) => {
+            el.classList.add('reveal-on-scroll');
+            el.dataset.revealDelay = index * 200;
+        });
+        
+        // Game cards reveal from right side
+        document.querySelectorAll('.game-card').forEach((el, index) => {
+            el.classList.add('reveal-on-scroll');
+            el.dataset.revealDelay = index * 200;
+        });
+        
+        // Section headers reveal with scale effect
+        document.querySelectorAll('.lg\\:text-center').forEach(el => {
+            el.classList.add('reveal-on-scroll');
+        });
+
+        // Contact 
+        document.querySelectorAll('.contact-item').forEach((el, index) => {
+            el.classList.add('reveal-on-scroll');
+            el.dataset.revealDelay = index * 200; // Staggered animation
+        });
+    }
+    
+    // Initialize the reveal animations
+    setupRevealElements();
+    
+    // If welcome animation is skipped, initialize reveal elements immediately
+    if (!welcomeOverlay || welcomeOverlay.style.opacity === "0") {
+        initializeScrollRevealElements();
+    }
 });
