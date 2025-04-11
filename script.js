@@ -43,7 +43,7 @@ document.addEventListener('DOMContentLoaded', function() {
         clearInterval(intervalId);
         
         // Show final greeting - personalized
-        welcomeText.textContent = "Welcome to my portfolio";
+        welcomeText.textContent = "Welcome";
         
         // Show scroll indicator
         const scrollIndicator = document.getElementById('scroll-indicator');
@@ -233,3 +233,181 @@ document.addEventListener('DOMContentLoaded', function() {
         initializeScrollRevealElements();
     }
 });
+
+// Hero section interactive hover effect
+document.addEventListener('DOMContentLoaded', function() {
+    const heroSection = document.getElementById('hero-section');
+    const gridEffect = heroSection.querySelector('.grid-effect');
+    
+    if (heroSection && gridEffect) {
+        heroSection.addEventListener('mousemove', function(e) {
+            const rect = heroSection.getBoundingClientRect();
+            const x = ((e.clientX - rect.left) / rect.width) * 100;
+            const y = ((e.clientY - rect.top) / rect.height) * 100;
+            
+            // Update the radial gradient position with CSS variables
+            gridEffect.style.setProperty('--x', `${x}%`);
+            gridEffect.style.setProperty('--y', `${y}%`);
+        });
+        
+        // Handle mouse enter/leave for additional effects
+        heroSection.addEventListener('mouseenter', function() {
+            gridEffect.style.opacity = '1';
+        });
+        
+        heroSection.addEventListener('mouseleave', function() {
+            gridEffect.style.opacity = '0';
+            
+            // Reset transforms when mouse leaves
+            const columns = heroSection.querySelectorAll('.max-w-7xl > div');
+            columns.forEach(col => {
+                col.style.transform = 'translateX(0) translateY(0)';
+            });
+        });
+    }
+});
+
+// Enhanced hero section interactive hover effect with parallax bending
+document.addEventListener('DOMContentLoaded', function() {
+    const heroSection = document.getElementById('hero-section');
+    const gridEffect = heroSection.querySelector('.grid-effect');
+    
+    // Create parallax wrap element for bending effect if it doesn't exist
+    if (!document.querySelector('.parallax-wrap')) {
+        const parallaxWrap = document.createElement('div');
+        parallaxWrap.className = 'parallax-wrap';
+        heroSection.appendChild(parallaxWrap);
+    }
+    
+    const parallaxWrap = heroSection.querySelector('.parallax-wrap');
+    const heroGrid = heroSection.querySelector('.chessboard-bg::before');
+    const contentSections = heroSection.querySelectorAll('.max-w-7xl > div');
+    const heroImage = heroSection.querySelector('.max-w-7xl > div:first-child img');
+    
+    if (heroSection) {
+        heroSection.addEventListener('mousemove', function(e) {
+            // Calculate mouse position relative to the hero section
+            const rect = heroSection.getBoundingClientRect();
+            const x = ((e.clientX - rect.left) / rect.width) * 100;
+            const y = ((e.clientY - rect.top) / rect.height) * 100;
+            
+            // Calculate offset values based on mouse position
+            // These determine how much the elements move in relation to cursor
+            const offsetX = (x - 50) / 10; // -5 to 5 range
+            const offsetY = (y - 50) / 10; // -5 to 5 range
+            
+            // Update the radial gradient position with CSS variables
+            gridEffect.style.setProperty('--x', `${x}%`);
+            gridEffect.style.setProperty('--y', `${y}%`);
+            
+            // Apply parallax bending transform to the background grid
+            heroSection.style.setProperty('--grid-x', `${offsetX * 0.5}deg`);
+            heroSection.style.setProperty('--grid-y', `${offsetY * 0.5}deg`);
+            
+            // Apply subtle transform to the background to create bending effect
+            // This creates the perception of the background warping
+            if (parallaxWrap) {
+                parallaxWrap.style.transform = `rotateX(${-offsetY * 0.5}deg) rotateY(${offsetX * 0.5}deg) translateZ(20px)`;
+            }
+            
+            // Apply perspective transform to the grid background
+            heroSection.style.cssText = `--x: ${x}%; --y: ${y}%;`;
+            heroSection.style.backgroundPosition = `calc(50% + ${offsetX * 2}px) calc(50% + ${offsetY * 2}px)`;
+            
+            // Transform content sections for parallax effect
+            if (contentSections[0]) {
+                contentSections[0].style.transform = `translateX(${-offsetX * 1.2}px) translateY(${-offsetY * 1.2}px) translateZ(10px)`;
+            }
+            
+            if (contentSections[1]) {
+                contentSections[1].style.transform = `translateX(${offsetX * 0.8}px) translateY(${offsetY * 0.8}px) translateZ(5px)`;
+            }
+            
+            // Add subtle tilt to the image
+            if (heroImage) {
+                heroImage.style.transform = `perspective(1000px) rotateX(${offsetY * 0.2}deg) rotateY(${-offsetX * 0.2}deg)`;
+            }
+            
+            // Add subtle transform to grid lines
+            document.documentElement.style.setProperty('--grid-offset-x', `${offsetX * 0.3}px`);
+            document.documentElement.style.setProperty('--grid-offset-y', `${offsetY * 0.3}px`);
+            
+            // Set opacity of grid effect
+            gridEffect.style.opacity = '1';
+        });
+        
+        // Reset all transforms when mouse leaves
+        heroSection.addEventListener('mouseleave', function() {
+            gridEffect.style.opacity = '0';
+            
+            // Reset transforms
+            if (parallaxWrap) {
+                parallaxWrap.style.transform = 'rotateX(0deg) rotateY(0deg) translateZ(0)';
+            }
+            
+            // Reset content transforms
+            contentSections.forEach(col => {
+                col.style.transform = 'translateX(0) translateY(0) translateZ(0)';
+            });
+            
+            // Reset image transform
+            if (heroImage) {
+                heroImage.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg)';
+            }
+            
+            // Reset grid position
+            document.documentElement.style.setProperty('--grid-offset-x', '0px');
+            document.documentElement.style.setProperty('--grid-offset-y', '0px');
+            
+            // Reset hero section background
+            heroSection.style.backgroundPosition = '50% 50%';
+        });
+    }
+});
+
+// Navigation hide/show on scroll
+(function() {
+    const nav = document.querySelector('nav');
+    let lastScrollY = window.scrollY;
+    let scrollingTimeout;
+    const scrollThreshold = 10; // Minimum scroll amount to trigger
+    
+    // Initialize scroll direction tracking
+    let isScrollingDown = true;
+    
+    window.addEventListener('scroll', function() {
+        const currentScrollY = window.scrollY;
+        
+        // Determine scroll direction
+        isScrollingDown = currentScrollY > lastScrollY;
+        const scrollDifference = Math.abs(currentScrollY - lastScrollY);
+        
+        // Clear the timeout on new scroll
+        clearTimeout(scrollingTimeout);
+        
+        if (currentScrollY <= 10) {
+            // Always show nav at the top of page
+            nav.classList.remove('nav-hidden');
+            nav.classList.remove('nav-scrolling-up');
+        } else if (scrollDifference > scrollThreshold) {
+            // Only trigger for significant scroll amounts
+            if (isScrollingDown) {
+                // Hide nav when scrolling down
+                nav.classList.add('nav-hidden');
+                nav.classList.remove('nav-scrolling-up');
+            } else {
+                // Show nav when scrolling up with animation
+                nav.classList.remove('nav-hidden');
+                nav.classList.add('nav-scrolling-up');
+            }
+        }
+        
+        // Set timeout to remove the scrolling-up animation after scrolling stops
+        scrollingTimeout = setTimeout(function() {
+            nav.classList.remove('nav-scrolling-up');
+        }, 1000);
+        
+        // Update last scroll position
+        lastScrollY = currentScrollY;
+    });
+})();

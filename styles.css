@@ -1,8 +1,69 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
+/* Aeonik Pro font family */
+@font-face {
+    font-family: 'Aeonik Pro';
+    src: url('fonts/AeonikPro-Air.otf') format('opentype');
+    font-weight: 100;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Aeonik Pro';
+    src: url('fonts/AeonikPro-Thin.otf') format('opentype');
+    font-weight: 200;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Aeonik Pro';
+    src: url('fonts/AeonikPro-Light.otf') format('opentype');
+    font-weight: 300;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Aeonik Pro';
+    src: url('fonts/AeonikPro-Regular.otf') format('opentype');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Aeonik Pro';
+    src: url('fonts/AeonikPro-Medium.otf') format('opentype');
+    font-weight: 500;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Aeonik Pro';
+    src: url('fonts/AeonikPro-Bold.otf') format('opentype');
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Aeonik Pro';
+    src: url('fonts/AeonikPro-Black.otf') format('opentype');
+    font-weight: 900;
+    font-style: normal;
+    font-display: swap;
+}
+
+:root {
+    --blue-color: #0016ec;
+}
+
 body {
-    font-family: 'Inter', sans-serif;
-    background-color: #fafafa;
+    font-family: 'Aeonik Pro';
+    background-color: #f0f1fa;
     color: #111;
 }
 
@@ -11,6 +72,10 @@ body {
     -webkit-background-clip: text;
     color: transparent;
     background-image: linear-gradient(90deg, #000, #333);
+}
+
+.text-blue {
+    color: var(--blue-color);
 }
 
 .gradient-bg {
@@ -56,10 +121,13 @@ body {
     to { opacity: 1; }
 }
 
+/* Enhanced Hero hover effects with parallax bending */
 .chessboard-bg {
     background-color: #121212; /* Matte black */
     position: relative;
     overflow: hidden;
+    perspective: 1000px; /* Adds 3D perspective for parallax effect */
+    
 }
 
 .chessboard-bg::before {
@@ -74,6 +142,54 @@ body {
         linear-gradient(to bottom, rgba(255, 255, 255, 0.07) 1px, transparent 1px);
     background-size: 40px 40px;
     z-index: 0;
+    transform-style: preserve-3d;
+    transition: transform 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+    will-change: transform; /* Performance optimization */
+    transform: translate3d(var(--grid-offset-x, 0), var(--grid-offset-y, 0), 0) 
+               rotateX(var(--grid-x, 0)) rotateY(var(--grid-y, 0));
+}
+
+.chessboard-bg:hover::before {
+    animation: gridGlow 4s infinite;
+}
+
+/* Add this to enable the bending grid effect */
+@keyframes gridGlow {
+    0% { opacity: 0.5; }
+    50% { opacity: 0.7; }
+    100% { opacity: 0.5; }
+}
+
+/* Hero hover effects */
+.grid-effect {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    background-image: radial-gradient(
+        circle at var(--x, 50%) var(--y, 50%),
+        rgba(255, 255, 255, 0.1) 0%,
+        rgba(255, 255, 255, 0.04) 20%,
+        transparent 50%
+    );
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    transform-style: preserve-3d;
+    transform: translateZ(0);
+    filter: blur(1px);
+}
+
+.chessboard-bg:hover .grid-effect {
+    opacity: 1;
+}
+
+/* Parallax wrapper for bending effect */
+.parallax-wrap {
+    position: absolute;
+    inset: 0;
+    transform-style: preserve-3d;
+    z-index: 1;
+    will-change: transform;
 }
 
 .grid-spotlight {
@@ -118,6 +234,34 @@ body {
 #hero-section.visible {
     opacity: 1;
     transform: translateY(0);
+}
+
+/* Subtle movement for hero section elements */
+#hero-section > .max-w-7xl > div {
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    will-change: transform;
+}
+
+/* Subtle image tilt */
+#hero-section > .max-w-7xl > div:first-child img {
+    transition: transform 0.3s ease;
+    transform-style: preserve-3d;
+    will-change: transform;
+}
+
+#hero-section:hover > .max-w-7xl > div:first-child {
+    transform: translateX(-8px) translateY(-4px);
+}
+
+#hero-section:hover > .max-w-7xl > div:last-child {
+    transform: translateX(8px) translateY(-4px);
+}
+
+/* Ensure content appears over the grid effect */
+#hero-section > .max-w-7xl {
+    position: relative;
+    z-index: 10;
+    transform-style: preserve-3d;
 }
 
 /* Improve welcome text animation */
@@ -166,4 +310,232 @@ body {
 @keyframes scrollIndicator {
     0% { transform: translate(-50%, 0); opacity: 1; }
     100% { transform: translate(-50%, 15px); opacity: 0; }
+}
+
+/* Updated Navigation Styles with scroll hide/show behavior */
+nav {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: fixed;
+    bottom: 6;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 50;
+    transition: transform 0.4s cubic-bezier(0.33, 1, 0.68, 1), 
+                opacity 0.4s cubic-bezier(0.33, 1, 0.68, 1);
+}
+
+nav.nav-hidden {
+    transform: translateX(-50%) translateY(100px);
+    opacity: 0;
+    pointer-events: none;
+}
+
+nav > div {
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    transform-origin: center center; /* Changed from bottom to center */
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), 
+                background-color 0.3s ease,
+                box-shadow 0.3s ease;
+}
+
+nav.nav-scrolling-up > div {
+    transform: scale(1.03);
+    background-color: rgba(255, 255, 255, 0.4);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+}
+
+.nav-icon {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 40px;
+    height: 40px;
+    background-color: transparent;
+    border-radius: 50%;
+    color: rgba(0, 0, 0, 0.6);
+    font-size: 1.2rem;
+    transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    position: relative;
+    overflow: hidden;
+}
+
+.nav-icon:hover {
+    color: #0016ec;
+    transform: scale(1.15);
+}
+
+.nav-icon::before {
+    content: '';
+position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 22, 236, 0.1);
+    border-radius: 50%;
+    transform: scale(0);
+transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    z-index: -1;
+}
+
+.nav-icon:hover::before {
+transform: scale(1);
+}
+
+.nav-icon i {
+    pointer-events: none; /* Prevent hover issues on icons */
+}
+
+/* Add these styles for the contact icon with "Hire me" text on hover */
+
+/* Contact icon with transformation */
+.nav-icon.contact-cta {
+    width: auto;
+    min-width: 40px;
+    height: 40px;
+    position: relative;
+    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 20px; /* Ensure rounded even in default state */
+}
+
+.nav-icon.contact-cta:hover {
+    width: auto;
+    min-width: 90px;
+    padding: 0 16px;
+    background-color: var(--blue-color);
+    color: white;
+    border-radius: 20px; /* Ensure consistent rounding */
+}
+
+/* When hovering over the entire nav bar */
+nav > div:hover .nav-icon.contact-cta {
+    width: auto;
+    min-width: 90px; /* Increase minimum width to fit text */
+    padding-left: 12px;
+    padding-right: 12px;
+    background-color: var(--blue-color);
+    color: white;
+    border-radius: 20px; /* Explicitly set rounded corners */
+    height: 40px;
+}
+
+/* Icon and text transitions */
+.nav-icon.contact-cta .icon-default {
+    transition: transform 0.3s ease, opacity 0.2s ease;
+}
+
+.nav-icon.contact-cta .cta-text {
+    position: absolute;
+    white-space: nowrap;
+    font-weight: 500;
+    font-size: 0.875rem;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+/* Arrow icon styling */
+.cta-text .arrow-icon {
+    display: inline-block;
+    transition: transform 0.3s ease;
+    font-size: 0.75rem;
+    margin-left: 2px;
+    transform: translateX(-4px);
+    opacity: 0;
+}
+
+/* Show text and hide icon when nav is hovered */
+nav > div:hover .nav-icon.contact-cta .icon-default {
+    opacity: 0;
+    transform: translateY(-20px);
+}
+
+nav > div:hover .nav-icon.contact-cta .cta-text {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Animate arrow on hover */
+nav > div:hover .nav-icon.contact-cta .cta-text .arrow-icon {
+    transform: translateX(0);
+    opacity: 1;
+    transition-delay: 0.1s;
+}
+
+/* Override default icon hover behavior for this specific icon */
+nav > div:hover .nav-icon.contact-cta::before,
+.nav-icon.contact-cta:hover::before {
+    transform: scale(0);
+}
+
+/* Updated Navigation Bar Hover Effects */
+
+/* When hovering over the entire nav bar */
+nav > div:hover .nav-icon.contact-cta {
+    width: auto;
+    min-width: 90px; /* Increase minimum width to fit text */
+    padding-left: 12px;
+    padding-right: 12px;
+    background-color: var(--blue-color);
+    color: white;
+}
+
+/* Always keep the envelope icon centered when not expanded */
+.nav-icon.contact-cta {
+    width: auto;
+    min-width: 40px;
+    position: relative;
+    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Icon and text transitions */
+.nav-icon.contact-cta .icon-default {
+    transition: transform 0.3s ease, opacity 0.2s ease;
+}
+
+.nav-icon.contact-cta .cta-text {
+    position: absolute;
+    white-space: nowrap;
+    font-weight: 500;
+    font-size: 0.875rem;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: transform 0.3s ease, opacity 0.2s ease;
+}
+
+/* Show text and hide icon when nav is hovered */
+nav > div:hover .nav-icon.contact-cta .icon-default {
+    opacity: 0;
+    transform: translateY(-20px);
+}
+
+nav > div:hover .nav-icon.contact-cta .cta-text {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Override default icon hover behavior for this specific icon */
+nav > div:hover .nav-icon.contact-cta::before,
+.nav-icon.contact-cta:hover::before {
+    transform: scale(0);
+}
+
+/* Improve spacing between nav items when CTA is expanded */
+nav > div:hover {
+    padding-right: 6px; /* Add a bit more padding on the right */
 }
