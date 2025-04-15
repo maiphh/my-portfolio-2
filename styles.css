@@ -59,11 +59,14 @@
 
 :root {
     --blue-color: #0016ec;
+    --white-bg: #f0f1fa;
+    --transition-smooth: 1s cubic-bezier(0.34, 1.56, 0.64, 1);
+    --transition-standard: 1s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 body {
     font-family: 'Aeonik Pro';
-    background-color: #f0f1fa;
+    background-color: var(--white-bg);
     color: #111;
 }
 
@@ -398,7 +401,7 @@ transform: scale(1);
     min-width: 40px;
     height: 40px;
     position: relative;
-    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    transition: all var(--transition-smooth);
     overflow: hidden;
     display: flex;
     justify-content: center;
@@ -496,7 +499,7 @@ nav > div:hover .nav-icon.contact-cta {
     width: auto;
     min-width: 40px;
     position: relative;
-    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    transition: all var(--transition-smooth);
     overflow: hidden;
     display: flex;
     justify-content: center;
@@ -538,4 +541,384 @@ nav > div:hover .nav-icon.contact-cta::before,
 /* Improve spacing between nav items when CTA is expanded */
 nav > div:hover {
     padding-right: 6px; /* Add a bit more padding on the right */
+}
+
+/* Lusion-inspired styling */
+.lusion-section {
+    margin: 0;
+    padding-top: 10rem;
+    padding-bottom: 10rem;
+    /* Removing default side padding */
+}
+
+/* Override the max-width constraint to allow wider content */
+.lusion-section .max-w-7xl {
+    max-width: 100%; /* Increase from default 80rem (1280px) to 95% of viewport */
+    width: 95%;
+    padding-left: 1rem;
+    padding-right: 1rem;
+}
+
+@media (min-width: 1280px) {
+    .lusion-section .max-w-7xl {
+        max-width: 100rem; /* Even wider on large screens - 1440px */
+    }
+}
+
+/* Adjust section header to use more width */
+.section-header {
+   display: flex;
+   flex-direction: column;
+   margin-bottom: 3rem;
+   width: 100%;
+   padding: 0;
+   height: auto;
+   align-items: flex-start;
+}
+
+.section-header h2 {
+    flex: 0 0 65%;
+    line-height: 1;
+    letter-spacing: -0.02em;
+    font-size: 9rem;
+    font-weight: 400;
+}
+
+.section-header p {
+   flex: 0 0 30%;
+   font-size: clamp(0.7rem, 1.2vw, 0.9rem); /* Scale between min and max */
+   line-height: 1.7;
+   color: black;
+   margin-right: 0;
+   text-align:justify;
+
+}
+
+@media (min-width: 1024px) {
+   .section-header {
+      flex-direction: row;
+      justify-content: space-between;
+      align-items: flex-end;
+   }
+   
+
+   
+   .section-header p {
+      flex: 0 0 30%;
+      line-height: 1.7;
+      color: black;
+      margin-right: 0;
+   }
+}
+
+
+/* Adjust base font size for mobile */
+@media (max-width: 768px) {
+   .section-header p {
+      font-size: clamp(0.75rem, 3vw, 1rem);
+      line-height: 1.6;
+      padding-top: 1rem;
+   }
+
+}
+
+/* Additional responsiveness for large screens */
+@media (min-width: 1280px) {
+   .section-header p {
+      width: 100%;
+      max-width: 450px; /* Limit container width on large screens */
+   }
+}
+
+/* Width-based adjustments to scale with container */
+@media (min-width: 1024px) and (max-width: 1440px) {
+   .section-header {
+      gap: 2rem;
+   }
+   
+   .section-header p {
+      flex: 0 0 35%; /* Give more width on medium screens */
+   }
+}
+
+/* Base section header styles */
+.section-header h2 {
+    line-height: 1;
+    letter-spacing: -0.02em;
+    font-size: clamp(2.5rem, 8vw, 8rem);
+    font-weight: 400;
+    width: 100%;
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+    hyphens: auto;
+}
+
+/* Additional responsive adjustments for section headers */
+
+
+@media (max-width: 768px) {
+    .section-header h2 {
+        line-height: 1;
+        letter-spacing: -0.01em;
+        margin-bottom: 1rem;
+        font-size: 2.5rem;
+    }
+    
+    .section-header {
+        text-align: left;
+        margin-bottom: 2rem;
+    }
+    
+    .section-header p {
+        font-size: .9rem;
+    }
+}
+
+/* Enhanced Project Cards */
+.lusion-project {
+    transition: transform 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+                
+    margin-bottom: 6rem;
+}
+
+.project-image-container {
+    position: relative;
+    overflow: hidden;
+    border-radius: 16px;
+    aspect-ratio: 16 / 9;  /* Maintain consistent aspect ratio */
+}
+
+.project-image-container img {
+    transition: transform var(--transition-smooth), 
+                opacity var(--transition-standard),
+                color var(--transition-standard),
+                background-color var(--transition-standard);
+    border-radius: 16px;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+}
+
+/* Enhanced hover effects */
+.project-link:hover .project-image-container img {
+    transform: scale(1.05);
+}
+
+/* Project info container with arrow hover effect */
+.project-info {
+    position: relative;
+    margin-top: 1.5rem;
+    padding: 0.5rem 0;
+    display: flex;
+    flex-direction: column;
+    transition: transform 1s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* Add arrow to project heading that appears on hover */
+.project-info h3 {
+    font-size: clamp(2.5rem, 3vw, 3rem);
+    font-weight: 400;
+    letter-spacing: -0.02em;
+    transition: transform var(--transition-smooth), 
+                opacity var(--transition-standard),
+                color var(--transition-standard),
+                background-color var(--transition-standard);
+    position: relative;
+    padding-left: 0;
+    display: inline-block;
+}
+
+.project-info h3::before {
+    content: "→";
+    position: absolute;
+    left: 0;
+    opacity: 0;
+    transform: translateX(-20px);
+    transition: transform 1.5s cubic-bezier(0.34, 1.56, 0.64, 1),
+                opacity .5s ease;
+    font-size: 2rem;
+    line-height: 1;
+}
+
+/* Hover effects for project title and arrow */
+.project-link:hover .project-info h3 {
+    transform: translateX(32px);
+
+}
+
+.project-link:hover .project-info h3::before {
+    opacity: 1;
+    transform: translateX(-28px);
+
+}
+
+/* Enhanced project categories */
+.project-categories {
+    font-size: 0.7rem;
+    letter-spacing: 0.1em;
+    margin-bottom: 1.5rem;
+    transition: transform var(--transition-smooth), 
+                opacity var(--transition-standard),
+                color var(--transition-standard),
+                background-color var(--transition-standard);
+}
+
+.project-link:hover .project-categories {
+    transform: translateX(32px);
+}
+
+/* Enhanced hover effect for entire card */
+.lusion-project:hover {
+    transform: translateY(-8px);
+
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .project-info h3 {
+        font-size: 2.5rem;
+    }
+    
+    .project-info h3::before {
+        font-size: 1.5rem;
+    }
+    
+    .project-link:hover .project-info h3 {
+        transform: translateX(24px);
+    }
+    
+    .project-link:hover .project-info h3::before {
+        transform: translateX(-20px);
+    }
+}
+
+.project-link {
+    display: block;
+    text-decoration: none;
+    color: inherit;
+}
+
+.project-categories {
+    font-size: 0.7rem;
+    letter-spacing: 0.1em;
+}
+
+/* Enhanced "See All Projects" button with better spacing and animation */
+.see-all-link {
+    display: inline-block;
+    position: relative;
+    font-size: 0.75rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    font-weight: 500;
+    padding: 1em 2.5em 1em 3em; /* More balanced padding */
+    height: 3.375em;
+    width: fit-content;
+    background-color: white;
+    border-radius: 5.3125em;
+    color: #000;
+    overflow: hidden;
+    transition: color var(--transition-standard), 
+                border-color var(--transition-standard), 
+                transform var(--transition-smooth);
+    box-shadow: 0 6px 10px rgba(0, 0, 0, 0.04), 0 2px 4px rgba(0, 0, 0, 0.04);
+    z-index: 1;
+    font-size: .875em;
+}
+
+/* Position the text to allow animation */
+.see-all-link span {
+    position: relative;
+    transition: transform var(--transition-smooth);
+    display: inline-block;
+}
+
+/* Black dot with better positioning */
+.see-all-link::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 1.25em; /* Move dot away from text */
+    width: 6px;
+    height: 6px;
+    background-color: #000;
+    border-radius: 50%;
+    transform: translateY(-50%);
+    transition: transform var(--transition-smooth), 
+                width var(--transition-smooth), 
+                height var(--transition-smooth), 
+                background-color var(--transition-smooth), 
+                border-radius var(--transition-smooth);
+    z-index: -1;
+}
+
+/* Add arrow that appears on hover */
+.see-all-link::after {
+    content: '→';
+    position: absolute;
+    top: 50%;
+    right: 1.25em;
+    transform: translateY(-50%) translateX(20px);
+    opacity: 1;
+    transition: transform var(--transition-smooth), 
+                opacity var(--transition-standard);
+    font-size: 1em;
+    color:white
+}
+
+/* Hover effects */
+.see-all-link:hover {
+    color: #fff;
+    border-color: var(--blue-color);
+    transform: translateY(-2px);
+    padding-right: 3em; /* Extra space for arrow */
+}
+
+
+
+/* Move text to the left on hover */
+.see-all-link:hover span {
+    transform: translateX(-1em);
+}
+
+/* Make dot expand and change color */
+.see-all-link:hover::before {
+    width: 500px;
+    height: 500px;
+    background-color: var(--blue-color);
+    border-radius: 0;
+    transform: translate(-50%, -50%);
+}
+
+/* Show arrow on hover */
+.see-all-link:hover::after {
+    transform: translateY(-50%) translateX(0);
+}
+
+/* Active state */
+.see-all-link:active {
+    transform: translateY(0);
+}
+
+/* Add subtle hover effects to entire project card */
+.lusion-project:hover {
+    transform: translateY(-4px);
+    /* box-shadow: 0 20px 40px var(--white-bg); */
+}
+
+/* Project grid layout responsive adjustments */
+@media (max-width: 768px) {
+    .lusion-project {
+        margin-bottom: 4rem;
+    }
+    
+
+    .project-image-container {
+        border-radius: 8px; /* Slightly smaller radius on mobile */
+    }
+    
+    .project-image-container img {
+        border-radius: 8px;
+    }
 }

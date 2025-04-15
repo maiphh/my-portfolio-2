@@ -57,7 +57,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Auto-scroll after 1.5 more seconds if user doesn't click
         setTimeout(initiateScrollDown, 1500);
-    }, 2100);
+    }, 0);
     
     // Function to handle the scroll transition
     function initiateScrollDown() {
