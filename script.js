@@ -234,6 +234,162 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
+// Create and append the music button with new SVG wave line
+const musicButton = document.createElement('div');
+musicButton.id = 'music-button';
+musicButton.classList.add('muted');
+musicButton.title = 'Play background music';
+
+// Create sound line with SVG for better wave animation
+const soundLine = document.createElement('div');
+soundLine.className = 'sound-line';
+
+// Create SVG element with path for the wave
+const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+svg.setAttribute('viewBox', '0 0 20 14');
+
+const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+path.setAttribute('d', 'M 0,7 Q 5,7 10,7 T 20,7');
+svg.appendChild(path);
+soundLine.appendChild(svg);
+
+musicButton.appendChild(soundLine);
+document.body.appendChild(musicButton);
+
+// Create and configure the audio element
+const audio = new Audio();
+audio.src = './sound/midnight-daydreams-250159.mp3';
+audio.loop = true;
+audio.volume = 0.2;
+audio.preload = 'auto';
+
+// Flag to track if we're trying to play
+let isAttemptingToPlay = false;
+
+// Initialize audio - try to load it
+audio.load();
+
+// Event listeners for audio state
+audio.addEventListener('canplaythrough', function() {
+    if (isAttemptingToPlay) {
+        playAudio();
+    }
+    musicButton.classList.remove('loading');
+});
+
+audio.addEventListener('play', updateMusicButtonState);
+audio.addEventListener('pause', updateMusicButtonState);
+audio.addEventListener('error', function(e) {
+    console.error('Audio error:', e);
+    musicButton.classList.remove('loading');
+    musicButton.classList.add('muted');
+    isAttemptingToPlay = false;
+});
+
+// Add more robust event listener with better debugging
+musicButton.addEventListener('click', function() {
+
+    
+    try {
+        if (audio.paused) {
+            isAttemptingToPlay = true;
+            musicButton.classList.add('loading');
+            
+            // Check if file exists first
+            fetch(audio.src, { method: 'HEAD' })
+                .then(response => {
+                    if (response.ok) {
+                        // File exists, try to play
+                        playAudio();
+                    } else {
+                        // File not found
+                        console.error(`Audio file not found at ${audio.src}`);
+                        handleAudioError(new Error(`File not found (${response.status})`));
+                    }
+                })
+                .catch(error => {
+                    console.error('Error checking audio file:', error);
+                    handleAudioError(error);
+                });
+        } else {
+            // Pause the audio
+            audio.pause();
+            isAttemptingToPlay = false;
+            console.log('Audio paused successfully');
+            updateMusicButtonState();
+        }
+    } catch (error) {
+        console.error('Error handling music button click:', error);
+        musicButton.classList.remove('loading');
+        handleAudioError(error);
+    }
+});
+
+// Function to handle audio errors
+function handleAudioError(error) {
+    console.error('Audio error details:', error);
+    
+    // Provide visual feedback about the error
+    musicButton.classList.remove('loading');
+    musicButton.classList.add('muted', 'error');
+    musicButton.title = 'Audio unavailable: ' + (error.message || 'Unknown error');
+    
+    // Reset state
+    isAttemptingToPlay = false;
+    
+    // Log additional debugging info
+    console.info('Audio element state:', {
+        src: audio.src,
+        networkState: audio.networkState,
+        readyState: audio.readyState,
+        error: audio.error ? {
+            code: audio.error.code,
+            message: audio.error.message
+        } : 'No error object'
+    });
+}
+
+// Function to play audio with improved error handling
+function playAudio() {
+    // Reset error states
+    musicButton.classList.remove('error');
+    
+    audio.play()
+        .then(() => {
+            console.log('Successfully started playback');
+            isAttemptingToPlay = false;
+            updateMusicButtonState();
+        })
+        .catch(err => {
+            console.error('Error starting playback:', err);
+            isAttemptingToPlay = false;
+            musicButton.classList.remove('loading');
+            handleAudioError(err);
+        });
+}
+
+// Function to update the button state
+function updateMusicButtonState() {
+    console.log('Updating button state, audio paused:', audio.paused);
+    
+    musicButton.classList.remove('loading');
+    
+    if (audio.paused) {
+        musicButton.classList.remove('playing');
+        musicButton.classList.add('muted');
+        // Flat line when paused
+        const path = musicButton.querySelector('.sound-line svg path');
+        if (path) {
+            path.setAttribute('d', 'M 0,7 Q 5,7 10,7 T 20,7');
+        }
+        musicButton.title = 'Play background music';
+    } else {
+        musicButton.classList.remove('muted');
+        musicButton.classList.add('playing');
+        musicButton.title = 'Pause background music';
+    }
+}
+
 // Hero section interactive hover effect
 document.addEventListener('DOMContentLoaded', function() {
     const heroSection = document.getElementById('hero-section');
@@ -284,6 +440,11 @@ document.addEventListener('DOMContentLoaded', function() {
     const contentSections = heroSection.querySelectorAll('.max-w-7xl > div');
     const heroImage = heroSection.querySelector('.max-w-7xl > div:first-child img');
     
+    // Position history queue for snake-like trailing effect
+    const positionHistory = [];
+    const maxHistoryLength = 20; // How many positions to remember
+    let animationFrameId = null;
+    
     if (heroSection) {
         heroSection.addEventListener('mousemove', function(e) {
             // Calculate mouse position relative to the hero section
@@ -291,50 +452,96 @@ document.addEventListener('DOMContentLoaded', function() {
             const x = ((e.clientX - rect.left) / rect.width) * 100;
             const y = ((e.clientY - rect.top) / rect.height) * 100;
             
-            // Calculate offset values based on mouse position
-            // These determine how much the elements move in relation to cursor
-            const offsetX = (x - 50) / 10; // -5 to 5 range
-            const offsetY = (y - 50) / 10; // -5 to 5 range
+            // Add current position to history queue
+            positionHistory.unshift({ x, y });
             
-            // Update the radial gradient position with CSS variables
-            gridEffect.style.setProperty('--x', `${x}%`);
-            gridEffect.style.setProperty('--y', `${y}%`);
-            
-            // Apply parallax bending transform to the background grid
-            heroSection.style.setProperty('--grid-x', `${offsetX * 0.5}deg`);
-            heroSection.style.setProperty('--grid-y', `${offsetY * 0.5}deg`);
-            
-            // Apply subtle transform to the background to create bending effect
-            // This creates the perception of the background warping
-            if (parallaxWrap) {
-                parallaxWrap.style.transform = `rotateX(${-offsetY * 0.5}deg) rotateY(${offsetX * 0.5}deg) translateZ(20px)`;
+            // Keep the queue at the desired length
+            if (positionHistory.length > maxHistoryLength) {
+                positionHistory.pop();
             }
             
-            // Apply perspective transform to the grid background
-            heroSection.style.cssText = `--x: ${x}%; --y: ${y}%;`;
-            heroSection.style.backgroundPosition = `calc(50% + ${offsetX * 2}px) calc(50% + ${offsetY * 2}px)`;
+            // Cancel previous animation frame if exists
+            if (animationFrameId) {
+                cancelAnimationFrame(animationFrameId);
+            }
             
-            // Transform content sections for parallax effect
+            // Use requestAnimationFrame for smoother rendering
+            animationFrameId = requestAnimationFrame(() => updateParallaxEffects(x, y));
+        });
+        
+        // Function to update all parallax effects with trail animation
+        function updateParallaxEffects(currentX, currentY) {
+            // Get positions for different delay points
+            const gridPos = getPositionWithDelay(0.1); // Almost immediate
+            const wrapperPos = getPositionWithDelay(0.2);
+            const content1Pos = getPositionWithDelay(0.3);
+            const content2Pos = getPositionWithDelay(0.4);
+            const imagePos = getPositionWithDelay(0.25);
+            
+            // Update the radial gradient position (no delay - follows cursor directly)
+            gridEffect.style.setProperty('--x', `${currentX}%`);
+            gridEffect.style.setProperty('--y', `${currentY}%`);
+            
+            // Calculate offset values from current position
+            const currentOffsetX = (currentX - 50) / 10; // -5 to 5 range
+            const currentOffsetY = (currentY - 50) / 10; // -5 to 5 range
+            
+            // Apply parallax bending transform with slight delay
+            const gridOffsetX = (gridPos.x - 50) / 10;
+            const gridOffsetY = (gridPos.y - 50) / 10;
+            heroSection.style.setProperty('--grid-x', `${gridOffsetX * 0.5}deg`);
+            heroSection.style.setProperty('--grid-y', `${gridOffsetY * 0.5}deg`);
+            
+            // Apply warping effect with more delay
+            if (parallaxWrap) {
+                const wrapOffsetX = (wrapperPos.x - 50) / 10;
+                const wrapOffsetY = (wrapperPos.y - 50) / 10;
+                parallaxWrap.style.transform = `rotateX(${-wrapOffsetY * 0.5}deg) rotateY(${wrapOffsetX * 0.5}deg) translateZ(20px)`;
+            }
+            
+            // Apply background position (base layer)
+            heroSection.style.cssText = `--x: ${currentX}%; --y: ${currentY}%;`;
+            heroSection.style.backgroundPosition = `calc(50% + ${currentOffsetX * 2}px) calc(50% + ${currentOffsetY * 2}px)`;
+            
+            // Transform content sections with different delays for snake effect
             if (contentSections[0]) {
-                contentSections[0].style.transform = `translateX(${-offsetX * 1.2}px) translateY(${-offsetY * 1.2}px) translateZ(10px)`;
+                const content1OffsetX = (content1Pos.x - 50) / 10;
+                const content1OffsetY = (content1Pos.y - 50) / 10;
+                contentSections[0].style.transform = `translateX(${-content1OffsetX * 1.2}px) translateY(${-content1OffsetY * 1.2}px) translateZ(10px)`;
             }
             
             if (contentSections[1]) {
-                contentSections[1].style.transform = `translateX(${offsetX * 0.8}px) translateY(${offsetY * 0.8}px) translateZ(5px)`;
+                const content2OffsetX = (content2Pos.x - 50) / 10;
+                const content2OffsetY = (content2Pos.y - 50) / 10;
+                contentSections[1].style.transform = `translateX(${content2OffsetX * 0.8}px) translateY(${content2OffsetY * 0.8}px) translateZ(5px)`;
             }
             
-            // Add subtle tilt to the image
+            // Add subtle tilt to the image with medium delay
             if (heroImage) {
-                heroImage.style.transform = `perspective(1000px) rotateX(${offsetY * 0.2}deg) rotateY(${-offsetX * 0.2}deg)`;
+                const imageOffsetX = (imagePos.x - 50) / 10;
+                const imageOffsetY = (imagePos.y - 50) / 10;
+                heroImage.style.transform = `perspective(1000px) rotateX(${imageOffsetY * 0.2}deg) rotateY(${-imageOffsetX * 0.2}deg)`;
             }
             
             // Add subtle transform to grid lines
-            document.documentElement.style.setProperty('--grid-offset-x', `${offsetX * 0.3}px`);
-            document.documentElement.style.setProperty('--grid-offset-y', `${offsetY * 0.3}px`);
+            document.documentElement.style.setProperty('--grid-offset-x', `${currentOffsetX * 0.3}px`);
+            document.documentElement.style.setProperty('--grid-offset-y', `${currentOffsetY * 0.3}px`);
             
-            // Set opacity of grid effect
+            // Ensure grid effect is visible
             gridEffect.style.opacity = '1';
-        });
+        }
+        
+        // Helper function to get position with delay (0-1 range, where 1 is max delay)
+        function getPositionWithDelay(delayFactor) {
+            // Calculate the index based on delay factor
+            const index = Math.min(
+                Math.floor(delayFactor * (positionHistory.length - 1)), 
+                positionHistory.length - 1
+            );
+            
+            // Return the delayed position or current position if history is empty
+            return positionHistory[index] || { x: 50, y: 50 };
+        }
         
         // Reset all transforms when mouse leaves
         heroSection.addEventListener('mouseleave', function() {
@@ -411,3 +618,160 @@ document.addEventListener('DOMContentLoaded', function() {
         lastScrollY = currentScrollY;
     });
 })();
+
+// Create an audio manager for handling UI sounds
+const SoundManager = {
+    // Web Audio API context
+    audioContext: null,
+    
+    // Last played times to prevent spamming
+    lastPlayed: {
+        hover: 0,
+        click: 0
+    },
+    
+    // Minimum delay between sound plays (milliseconds)
+    minDelay: 100,
+    
+    // Volume settings
+    volume: {
+        hover: 0.1,
+        click: 0.2
+    },
+    
+    // Initialize the sound manager
+    init() {
+        // Create audio context
+        try {
+            window.AudioContext = window.AudioContext || window.webkitAudioContext;
+            this.audioContext = new AudioContext();
+            console.log('Audio context created successfully');
+        } catch (e) {
+            console.warn('Web Audio API not supported', e);
+            return;
+        }
+        
+        // Add hover sounds to interactive elements
+        this.addHoverSounds();
+        console.log('Hover sounds initialized');
+    },
+    
+    // Create a simple synthetic sound (no file dependency)
+    createSound(type) {
+        if (!this.audioContext) return;
+        
+        const oscillator = this.audioContext.createOscillator();
+        const gainNode = this.audioContext.createGain();
+        
+        // Different sound configs for different interaction types
+        if (type === 'hover') {
+            oscillator.type = 'sine';
+            oscillator.frequency.setValueAtTime(880, this.audioContext.currentTime); // Higher pitch for hover
+            gainNode.gain.setValueAtTime(this.volume.hover, this.audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.001, this.audioContext.currentTime + 0.1);
+        } else if (type === 'click') {
+            oscillator.type = 'triangle';
+            oscillator.frequency.setValueAtTime(440, this.audioContext.currentTime);
+            gainNode.gain.setValueAtTime(this.volume.click, this.audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.001, this.audioContext.currentTime + 0.2);
+        }
+        
+        oscillator.connect(gainNode);
+        gainNode.connect(this.audioContext.destination);
+        
+        oscillator.start();
+        oscillator.stop(this.audioContext.currentTime + 0.3);
+        
+        return { oscillator, gainNode };
+    },
+    
+    // Play a sound with debouncing
+    play(soundName) {
+        const now = Date.now();
+        if (now - this.lastPlayed[soundName] < this.minDelay) return;
+        
+        this.lastPlayed[soundName] = now;
+        this.createSound(soundName);
+        console.log(`Playing ${soundName} sound`);
+    },
+    
+    // Add hover sounds to interactive elements
+    addHoverSounds() {
+        // Define selectors for interactive elements
+        const interactiveElements = [
+            'a', 
+            'button', 
+            '.nav-icon',
+            '.project-link',
+            '.game-card',
+            '.see-all-link',
+            '#music-button',
+            '.lusion-project'
+        ];
+        
+        // Add event listeners to each element
+        interactiveElements.forEach(selector => {
+            const elements = document.querySelectorAll(selector);
+            console.log(`Found ${elements.length} ${selector} elements`);
+            
+            elements.forEach(element => {
+                // Only add once
+                if (element.dataset.hasSoundHover) return;
+                element.dataset.hasSoundHover = true;
+                
+                element.addEventListener('mouseenter', () => {
+                    console.log(`Hover detected on ${selector}`);
+                    this.play('hover');
+                });
+                
+                element.addEventListener('click', () => {
+                    this.play('click');
+                });
+            });
+        });
+    }
+};
+
+// Make sure context is created on user interaction to satisfy autoplay policy
+document.addEventListener('click', function initAudio() {
+    if (SoundManager.audioContext) {
+        // Resume context if it was suspended
+        if (SoundManager.audioContext.state === 'suspended') {
+            SoundManager.audioContext.resume();
+        }
+    } else {
+        // Initialize on first interaction
+        SoundManager.init();
+    }
+    // Remove this listener after first click
+    document.removeEventListener('click', initAudio);
+}, { once: false });
+
+// Initialize sound manager after DOM content is loaded
+document.addEventListener('DOMContentLoaded', function() {
+    // Other DOM content loaded handlers...
+    
+    // Initialize soundManager
+    setTimeout(() => {
+        SoundManager.init();
+        refreshHoverSounds();
+    }, 500); // Small delay to ensure all elements are ready
+});
+
+// For dynamically added elements, re-apply sound effects
+const refreshHoverSounds = () => {
+    if (SoundManager && SoundManager.audioContext) {
+        SoundManager.addHoverSounds();
+    }
+};
+
+// Re-apply hover sounds after any potential DOM updates
+const observer = new MutationObserver(() => {
+    refreshHoverSounds();
+});
+
+// Start observing DOM changes
+observer.observe(document.body, { 
+    childList: true,
+    subtree: true
+});

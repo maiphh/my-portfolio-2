@@ -146,7 +146,7 @@ body {
     background-size: 40px 40px;
     z-index: 0;
     transform-style: preserve-3d;
-    transition: transform 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+    transition: transform 0.3s ease-out;
     will-change: transform; /* Performance optimization */
     transform: translate3d(var(--grid-offset-x, 0), var(--grid-offset-y, 0), 0) 
                rotateX(var(--grid-x, 0)) rotateY(var(--grid-y, 0));
@@ -176,7 +176,7 @@ body {
         transparent 50%
     );
     opacity: 0;
-    transition: opacity 0.3s ease;
+    transition: opacity 0.3s ease, background-image 0.05s linear;
     transform-style: preserve-3d;
     transform: translateZ(0);
     filter: blur(1px);
@@ -193,6 +193,7 @@ body {
     transform-style: preserve-3d;
     z-index: 1;
     will-change: transform;
+    transition: transform 0.15s ease-out;
 }
 
 .grid-spotlight {
@@ -241,13 +242,13 @@ body {
 
 /* Subtle movement for hero section elements */
 #hero-section > .max-w-7xl > div {
-    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    transition: transform 0.2s ease-out;
     will-change: transform;
 }
 
 /* Subtle image tilt */
 #hero-section > .max-w-7xl > div:first-child img {
-    transition: transform 0.3s ease;
+    transition: transform 0.25s ease-out;
     transform-style: preserve-3d;
     will-change: transform;
 }
@@ -602,6 +603,7 @@ nav > div:hover {
    }
    
 
+
    
    .section-header p {
       flex: 0 0 30%;
@@ -921,4 +923,175 @@ nav > div:hover {
     .project-image-container img {
         border-radius: 8px;
     }
+}
+
+/* Custom Scrollbar Styling */
+::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+}
+
+::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 2px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.4);
+    border-radius: 2px;
+    transition: background 0.3s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--blue-color);
+}
+
+/* For Firefox */
+* {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(0, 0, 0, 0.4) rgba(255, 255, 255, 0.05);
+}
+
+/* Hide scrollbar on mobile but keep functionality */
+@media (max-width: 768px) {
+    ::-webkit-scrollbar {
+        width: 2px;
+    }
+    
+    ::-webkit-scrollbar-thumb {
+        background: rgba(0, 0, 0, 0.2);
+    }
+}
+
+/* Optional: Add progress indicator with smooth transitions */
+.scroll-progress {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 2px;
+    background: var(--blue-color);
+    z-index: 9999;
+    width: 0%;
+    transition: width 0.1s ease;
+}
+
+/* Music Button Styles */
+#music-button {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    z-index: 1000;
+    transition: all 0.3s ease;
+    background-color: rgba(255, 255, 255, 0.3);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+#music-button:hover {
+    background-color: rgba(0, 22, 236, 0.8);
+    transform: scale(1.05);
+}
+
+/* Sound line styling - single curved line */
+.sound-line {
+    width: 20px;
+    height: 14px;
+    position: relative;
+    transition: all 0.3s ease;
+    /* No background color - the SVG path will be the visible element */
+    background-color: transparent;
+    overflow: visible;
+}
+
+/* SVG path for the sound wave */
+.sound-line svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+.sound-line svg path {
+    stroke: #000;
+    stroke-width: 2px;
+    fill: none;
+    stroke-linecap: round;
+    transition: all 0.3s ease;
+}
+
+/* Sound waves for playing state - curved animation */
+#music-button.playing .sound-line svg path {
+    animation: path-wave 1.2s infinite ease-in-out;
+}
+
+#music-button:hover .sound-line svg path {
+    stroke: white;
+}
+
+/* Single wave curve animation */
+@keyframes path-wave {
+    0% { 
+        d: path("M 0,7 Q 5,7 10,7 T 20,7");
+    }
+    25% {
+        d: path("M 0,7 Q 5,3 10,7 T 20,7");
+    }
+    50% { 
+        d: path("M 0,7 Q 5,0 10,7 T 20,7"); 
+    }
+    75% {
+        d: path("M 0,7 Q 5,11 10,7 T 20,7");
+    }
+    100% { 
+        d: path("M 0,7 Q 5,7 10,7 T 20,7");
+    }
+}
+
+/* Loading state for music button */
+#music-button.loading .sound-line svg path {
+    animation: path-pulse 1.5s infinite;
+}
+
+/* Error state */
+#music-button.error .sound-line svg path {
+    stroke: #ff6b6b;
+}
+
+@keyframes path-pulse {
+    0%, 100% { opacity: 0.6; }
+    50% { opacity: 1; }
+}
+
+/* Add subtle cursor indicator for interactive elements with sound */
+a:not([data-no-sound]), 
+button:not([data-no-sound]), 
+.nav-icon, 
+.project-link, 
+.game-card, 
+.see-all-link, 
+#music-button {
+    cursor: pointer;
+    will-change: transform;
+}
+
+/* Improve hover animations to match with sound effects */
+a:not([data-no-sound]):hover, 
+button:not([data-no-sound]):hover {
+    transition: all 0.2s ease-out;
+}
+
+/* Enhanced hover effects to coordinate with sound */
+.project-link:hover .project-image-container img,
+.game-card:hover,
+.nav-icon:hover,
+.see-all-link:hover {
+    transform: scale(1.05);
+    transition: transform 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
